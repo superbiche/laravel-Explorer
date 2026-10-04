@@ -16,6 +16,7 @@ use JeroenG\Explorer\Domain\IndexManagement\IndexConfigurationRepositoryInterfac
 use Laravel\Scout\Builder;
 use Laravel\Scout\Engines\Engine;
 use Webmozart\Assert\Assert;
+use Log;
 
 class ElasticEngine extends Engine
 {
@@ -76,6 +77,11 @@ class ElasticEngine extends Engine
                     }, "")
                 ];
             });
+
+            if (config("explorer.log_indexing_errors") && config("explorer.log_indexing_errors_logger")) {
+                $level = config("explorer.log_indexing_errors_level", "warning");
+                Log::channel(config("explorer.log_indexing_errors_logger"))->$level(sprintf("Some %s models could not be indexed in index %s: %s", get_class($firstModel), $indexName, $errors->join("\n")), $errors->toArray());
+            }
         }
 
     }
